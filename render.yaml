@@ -1,7 +1,7 @@
 services:
   - type: web
     name: mercado-da-vila
-    env: java
+    runtime: java
     plan: free
     buildCommand: "./mvnw clean install"
     startCommand: "java -jar target/mercado-da-vila-0.0.1-SNAPSHOT.jar"
@@ -13,4 +13,4 @@ services:
       - key: SPRING_DATASOURCE_USERNAME
         value: "rm557568"
       - key: SPRING_DATASOURCE_PASSWORD
-        value: "060300"
+        value: "SUA_SENHA_AQUI" # Lembre-se de colocar sua senha aqui
