@@ -8,6 +8,9 @@ WORKDIR /app
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 
+# A SOLUÇÃO ESTÁ AQUI: Dar permissão de execução ao mvnw
+RUN chmod +x mvnw
+
 # Etapa 4: Baixar todas as dependências (esta camada será cacheada para builds mais rápidos)
 RUN ./mvnw dependency:go-offline
 
@@ -15,8 +18,7 @@ RUN ./mvnw dependency:go-offline
 COPY src ./src
 
 # Etapa 6: Compilar o projeto e empacotar em um arquivo .jar
-# Adicionamos a permissão de execução ao mvnw aqui dentro do container
-RUN chmod +x mvnw && ./mvnw package -DskipTests
+RUN ./mvnw package -DskipTests
 
 # Etapa 7: Expor a porta que sua aplicação usa
 EXPOSE 8082
