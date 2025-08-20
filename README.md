@@ -1,13 +1,16 @@
 # Projeto: Mercado da Vila (API Express)
 
-API RESTful para um sistema de gerenciamento de um mercado express, desenvolvida como projeto para a disciplina de Spring Framework da FIAP. A aplicação permite o controle de produtos através de operações CRUD (Create, Read, Update, Delete) e segue o nível 3 de maturidade de Richardson com a implementação de HATEOAS.
+## Objetivo do Projeto
+Esta é uma API RESTful para um sistema de gerenciamento de um mercado express, desenvolvida como projeto para a disciplina de Spring Framework da FIAP. O objetivo é criar o "cérebro" de uma aplicação que controla um catálogo de produtos, permitindo cadastrar, consultar, atualizar e deletar itens.
+
+A aplicação foi construída seguindo padrões modernos de desenvolvimento, como o nível 3 de maturidade de Richardson, que garante uma API bem estruturada e fácil de usar, através da implementação de HATEOAS (links que guiam o usuário sobre as próximas ações possíveis).
 
 ---
 
 ## 👨‍💻 Integrantes
 
 - Arthur Bispo de Lima - RM:557568
-- João Paulo Moreira dos Santos RM:557808
+- João Paulo Moreira dos Santos - RM:557808
 
 ---
 
@@ -24,11 +27,39 @@ API RESTful para um sistema de gerenciamento de um mercado express, desenvolvida
 - **Build Tool:** Maven
 - **Banco de Dados:** Oracle (SQL Developer)
 - **Dependências Principais:**
-    - `Spring Web`: Para criação de endpoints REST.
-    - `Spring Data JPA`: Para persistência de dados.
-    - `Lombok`: Para redução de código boilerplate.
-    - `Spring HATEOAS`: Para implementação do Nível 3 de Maturidade.
-    - `Oracle Driver`: Para conexão com o banco de dados Oracle.
+    - `Spring Web`: Ferramenta que nos permite "ouvir" requisições da internet (como as do Postman) e responder a elas.
+    - `Spring Data JPA`: Uma "mágica" que conversa com o banco de dados por nós, evitando que a gente precise escrever comandos SQL complexos.
+    - `Lombok`: Uma ferramenta que nos ajuda a escrever menos código repetitivo nas nossas classes Java.
+    - `Spring HATEOAS`: Ajuda a criar links inteligentes nas respostas da API, informando o que pode ser feito a seguir.
+    - `Oracle Driver`: A "ponte" que permite que nossa aplicação Java se conecte ao banco de dados Oracle.
+
+---
+
+## 🏛️ Arquitetura e Explicação do Código
+
+Para que um leigo entenda, dividimos o código em três partes principais, seguindo uma arquitetura padrão de mercado.
+
+### 1. **`Produto.java` (O Modelo / A "Planta Baixa")**
+- **O que é?** Esta classe é a "planta baixa" ou o "molde" de um produto. Ela define exatamente quais informações um produto deve ter: `id`, `nome`, `tipo`, `setor`, `tamanho` e `preco`.
+- **Como funciona?** A anotação `@Entity` diz ao Spring: "Ei, cada objeto criado a partir desta classe corresponde a uma linha na tabela do banco de dados". É a representação do nosso produto dentro do código.
+
+### 2. **`ProdutoRepository.java` (O Repositório / O "Almoxarifado")**
+- **O que é?** Pense nesta interface como o "gerente do almoxarifado". É a única parte do código que tem a permissão e o conhecimento para falar diretamente com o banco de dados.
+- **Como funciona?** Ao estender `JpaRepository`, o Spring Data JPA nos dá, de graça, todos os métodos básicos para gerenciar os produtos: salvar (`save`), buscar todos (`findAll`), buscar por ID (`findById`) e deletar (`deleteById`). Não precisamos escrever uma única linha de SQL!
+
+### 3. **`ProdutoController.java` (O Controlador / A "Recepção")**
+- **O que é?** Esta é a "recepção" da nossa API. É a camada que fica de frente para a internet, recebendo as "ligações" (requisições) dos clientes (como o Postman).
+- **Como funciona?** Cada método dentro desta classe, anotado com `@GetMapping`, `@PostMapping`, etc., corresponde a uma das operações do CRUD. Quando uma requisição chega (ex: um `GET` para `/mercado`), o `Controller` a recebe, chama o "gerente do almoxarifado" (`Repository`) para buscar os dados no banco, e então formata e envia a resposta de volta para o cliente.
+
+### Fluxo de uma Requisição (Exemplo: GET /mercado)
+1.  O usuário clica em "Send" no **Postman**.
+2.  A requisição viaja pela internet e chega no nosso **`ProdutoController`**, porque ele está "escutando" no endereço `/mercado`.
+3.  O `Controller` chama o método `findAll()` do nosso **`ProdutoRepository`**.
+4.  O `Repository`, usando a mágica do JPA, vai até o **Banco de Dados Oracle** e busca todos os produtos.
+5.  O Banco de Dados devolve a lista para o `Repository`.
+6.  O `Repository` devolve a lista para o `Controller`.
+7.  O `Controller` transforma a lista em JSON, adiciona os links HATEOAS e envia a resposta de volta para o **Postman**.
+8.  O usuário vê a lista de produtos na tela.
 
 ---
 
@@ -50,81 +81,20 @@ CREATE TABLE TDS_TB_MERCADO_VILA (
 );
 ```
 
+---
+
 ## ⚙️ Endpoints da API (CRUD)
 
 A seguir, a documentação de cada endpoint da API, com exemplos de uso no Postman.
 
-1. Consultar Todos os Produtos (GET)
-Retorna a lista de todos os produtos cadastrados no banco de dados.
+(Aqui você mantém a sua seção de endpoints exatamente como estava, com os prints)
 
-Método: GET
-
-URL: /mercado
-
-Resposta de Sucesso: Status 200 OK com a lista de produtos em JSON.
-
-[COLE AQUI O PRINT DO POSTMAN DO GET ALL]
-
-2. Cadastrar Novo Produto (POST)
-   Cria um novo produto no banco de dados.
-
-Método: POST
-
-URL: /mercado
-
-Corpo da Requisição (Body):
-
-JSON
-```json
-{
-"nome": "Iogurte Grego",
-"tipo": "Laticínio",
-"setor": "Geladeira",
-"tamanho": "100g",
-"preco": 4.50
-}
-```
-Resposta de Sucesso: Status 201 Created com os dados do produto recém-criado.
-
-[COLE AQUI O PRINT DO POSTMAN DO POST]
-
-Atualizar um Produto (PUT)
-Atualiza todos os dados de um produto existente a partir do seu ID.
-
-Método: PUT
-
-URL: /mercado/{id}
-
-Corpo da Requisição (Body):
-
-JSON
-```json
-{
-"id": 11,
-"nome": "Iogurte Grego Sabor Morango",
-"tipo": "Laticínio",
-"setor": "Geladeira",
-"tamanho": "100g",
-"preco": 4.75
-}
-```
-Resposta de Sucesso: Status 200 OK com os dados do produto atualizado.
-
-[COLE AQUI O PRINT DO POSTMAN DO PUT]
-
-4. Deletar um Produto (DELETE)
-   Remove um produto do banco de dados a partir do seu ID.
-
-Método: DELETE
-
-URL: /mercado/{id}
-
-Resposta de Sucesso: Status 204 No Content sem corpo na resposta.
-
-[COLE AQUI O PRINT DO POSTMAN DO DELETE]
+---
 
 ## 🔗 Link do Deploy
 
-A aplicação está disponível para acesso no seguinte endereço:
+A aplicação está disponível para acesso no seguinte endereço. Testes podem ser feitos com o Postman usando esta URL base.
 
-[LINK FICARÁ AQUI QUANDO FIZERMOS O DEPLOY]
+**URL Base:** `https://mercado-da-vila.onrender.com`
+
+**Exemplo de endpoint:** `GET https://mercado-da-vila.onrender.com/mercado`
